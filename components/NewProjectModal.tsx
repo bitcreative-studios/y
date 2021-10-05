@@ -1,6 +1,10 @@
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useState, useEffect, useContext } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
+
+import app from '../lib/firebase'
+import { getFirestore, collection, addDoc } from 'firebase/firestore'
+import CurrentUserContext from '../context'
 
 const NewProjectModal = ({ open, onClose: handleClose }) => {
   const [projectName, setProjectName] = useState('')
@@ -12,11 +16,39 @@ const NewProjectModal = ({ open, onClose: handleClose }) => {
     } = event
     setProjectName(value)
   }
-  const handleCreate = event => {
+  // const user = useContext(CurrentUserContext)
+  const handleCreate = async event => {
     event.preventDefault()
-    // FIXME
-    handleClose()
+    // const db = firebaseApp.firestore()
+    try {
+      setIsLoading(true)
+      const db = getFirestore(app)
+      const docRef = await addDoc(collection(db, 'projects'), {
+        name: projectName,
+      })
+      console.log('Document written with ID: ', docRef.id)
+      setIsLoading(false)
+      handleClose()
+    } catch (e) {
+      console.error('Error adding document: ', e)
+    }
+    // db.collection('projects')
+    //   .add({ projectName })
+    //   .then(async res => {
+    //     console.log(res)
+    //     // component logic comes here //
+    //     handleClose()
+    //     // toast.success('Project created Successfully')
+    //   })
+    //   .catch(err => {
+    //     // toast.error('Oops!! Something went wrong')
+    //     console.log('err', err)
+    //   })
   }
+
+  useEffect(() => {
+    return () => setProjectName('')
+  }, [open])
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -66,7 +98,7 @@ const NewProjectModal = ({ open, onClose: handleClose }) => {
                 </button>
               </div>
               <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <div className="w-full mt-3 text-center sm:mt-0 sm:text-left">
                   <Dialog.Title
                     as="h3"
                     className="text-lg leading-6 font-medium text-gray-900"
@@ -82,8 +114,8 @@ const NewProjectModal = ({ open, onClose: handleClose }) => {
                         value={projectName}
                         onChange={handleInput}
                         type="text"
-                        name="email"
-                        id="email"
+                        name="projectName"
+                        id="projectName"
                         className="py-2 px-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-400 rounded-md"
                         placeholder="project name"
                       />

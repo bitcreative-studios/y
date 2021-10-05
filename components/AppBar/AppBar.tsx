@@ -16,7 +16,6 @@ const AppBar = ({ projectName = '' }: AppBarProps) => {
   const handleCloseModal = () => setIsOpen(false)
   const handleOpenModal = () => setIsOpen(true)
 
-  console.log(currentUser)
   return (
     <div className="py-5 border-b border-gray-200">
       <div className="container mx-auto sm:flex sm:items-center sm:justify-between">
